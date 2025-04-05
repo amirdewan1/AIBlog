@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>{% block title %}Welcome to Blog Platform{% endblock %}</title>
+
+        <!-- Favicon -->
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>📝</text></svg>">
+        
+        <!-- Tailwind CSS for styling -->
+        <script src="https://cdn.tailwindcss.com"></script>
+
+        <!-- Alpine.js for interactivity -->
+        <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.3.5/dist/alpine.min.js" defer></script>
+    </head>
+    <body class="bg-gray-50 text-gray-800 antialiased leading-relaxed font-sans">
+        {% block header %}
+        <header>
+            <!-- Navigation Bar -->
+            <nav class="flex items-center justify-between flex-wrap px-6 py-4 fixed w-full z-10 top-0 bg-blue-500 shadow-lg" x-data="{ isOpen: false }" @keydown.escape="isOpen = false">
+                
+                <!-- Logo and Website Title -->
+                <div class="flex items-center text-white font-semibold text-xl">
+                    <a href="{{ path('blog_index') }}" class="hover:no-underline">
+                        📝 <span class="pl-2">Blog Platform</span>
+                    </a>
+                </div>
+
+                <!-- Mobile Hamburger Menu -->
+                <button @click="isOpen = !isOpen" class="block lg:hidden text-white hover:text-gray-200 focus:outline-none">
+                    <svg class="h-6 w-6 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path x-show="isOpen" d="M18.364 6.364a1 1 0 0 1 1.414 1.414L13.414 14l6.364 6.364a1 1 0 0 1-1.414 1.414L12 15.414l-6.364 6.364a1 1 0 0 1-1.414-1.414L10.586 14 4.222 7.636a1 1 0 0 1 1.414-1.414L12 12.586l6.364-6.364z" />
+                        <path x-show="!isOpen" d="M4 6h16a1 1 0 0 1 0 2H4a1 1 0 1 1 0-2zm0 6h16a1 1 0 0 1 0 2H4a1 1 0 1 1 0-2zm0 6h16a1 1 0 0 1 0 2H4a1 1 0 1 1 0-2z" />
+                    </svg>
+                </button>
+
+                <!-- Navigation Links -->
+                <div class="w-full lg:flex lg:items-center lg:w-auto" :class="{ 'block': isOpen, 'hidden': !isOpen }">
+                    <ul class="flex flex-col lg:flex-row lg:space-x-6 mt-4 lg:mt-0">
+                        <li><a href="{{ path('blog_index') }}" class="text-white hover:text-blue-100 py-2 block">Home</a></li>
+                        <li><a href="{{ path('blog_index') }}" class="text-white hover:text-blue-100 py-2 block">Blogs</a></li>
+                        <li><a href="#" class="text-white hover:text-blue-100 py-2 block">Contact</a></li>
+                        {% if is_granted('ROLE_ADMIN') %}
+                        <li><a href="{{ path('admin_dashboard') }}" class="text-white hover:text-blue-100 py-2 block">Dashboard</a></li>
+                        {% endif %}
+                        {% if app.user %}
+                        <li class="text-white py-2 block">Logged in as <strong>{{ app.user.username }}</strong> <span class="text-sm text-blue-200">({{ app.user.roles|join(', ') }})</span></li>
+                        <li><a href="{{ path('app_logout') }}" class="text-white hover:text-blue-100 py-2 block">Logout</a></li>
+                        {% else %}
+                        <li><a href="{{ path('app_login') }}" class="text-white hover:text-blue-100 py-2 block">Login</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </nav>
+        </header>
+
+        {% block body %}
+        <main class="container mx-auto px-4 pt-28">
+            {% block content %}{% endblock %}
+        </main>
+        {% endblock %}
+
+        {% block footer %}
+        <footer class="bg-blue-500 text-white text-center py-6 mt-10">
+            <p>&copy; {{ "now"|date("Y") }} Blog Platform. Assignment 1</p>
+        </footer>
+        {% endblock %}
+
+        <div id="chatbot-container"></div>
+        <script type="module" src="{{ asset('chatbot/assets/index-DF-ceGBJ.js') }}"></script>
+        <link rel="stylesheet" href="{{ asset('chatbot/assets/index-BAtuNgvi.css') }}">
+    </body>
+  {% endblock %}
+    
+</html>

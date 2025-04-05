@@ -1,0 +1,109 @@
+{% extends "./base.html.twig" %}
+
+{% block body %}
+   {% macro render_stars(rating) %}
+    <div class="flex items-center space-x-1">
+        {% for i in 1..5 %}
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="{{ i <= rating ? 'gold' : 'none' }}" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927a1 1 0 011.902 0l2.31 6.957a1 1 0 00.95.69h7.273a1 1 0 01.592 1.806l-5.898 4.301a1 1 0 00-.364 1.118l2.31 6.957a1 1 0 01-1.536 1.118l-5.898-4.301a1 1 0 00-1.175 0l-5.898 4.301a1 1 0 01-1.536-1.118l2.31-6.957z" />
+            </svg>
+        {% endfor %}
+    </div>
+    {% endmacro %}
+
+<div class="pt-28 px-4 mx-auto max-w-7xl">
+    <header class="text-center mb-10">
+        <h1 class="text-4xl font-bold text-gray-800">
+            Blog reviews
+        </h1>
+        <p class="text-gray-500 mt-2">Total Blogs Reviewed: <strong>{{ blogs|length }}</strong></p>
+    </header>
+
+    {% if app.user %}
+    <div class="text-center mb-8">
+        <a 
+            href="/blogs/create" 
+            class="bg-green-500 text-white font-semibold py-2 px-6 rounded shadow hover:bg-green-600 transition">
+            + Add New Blog
+        </a>
+
+<div class="container mx-auto mt-10">
+    <div class="max-w-lg mx-auto">
+        {{ form_start(searchForm, {'method': 'POST', 'action': path('blog_index'), 'attr': {'class': 'space-y-4'}}) }}
+            <div class="flex items-center border-b border-teal-500 py-2">
+                {{ form_widget(searchForm.title, {'attr': {'class': 'appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none', 'placeholder': 'Search by title...'}}) }}
+                <button class="flex-shrink-0 bg-teal-500 hover:bg-teal-700 border-teal-500 hover:border-teal-700 text-sm border-4 text-white py-1 px-2 rounded" type="submit">
+                    Search
+                </button>
+            </div>
+        {{ form_end(searchForm) }}
+    </div>
+</div>
+    {% endif %}
+
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for blog in blogs %}
+            <article class="bg-white border rounded-lg shadow-sm p-4">
+                {% if blog.imagePath %}
+    <img src="{{ asset(blog.imagePath) }}" alt="{{ blog.title }}" class="w-full h-40 object-cover rounded-lg mb-4">
+{% else %}
+    <img src="{{ asset('uploads/default.jpg') }}" alt="Default Image" class="w-full h-40 object-cover rounded-lg mb-4">
+{% endif %}
+
+                <h2 class="text-lg font-bold text-gray-700">{{ blog.title }}</h2>
+                <p class="text-sm text-gray-500 mb-4">{{ blog.publisher }}</p>
+                <div class="mb-4">
+                    <p class="text-sm text-gray-600 font-semibold">Average Rating:</p>
+                    {% import _self as star_helper %}
+                    <div class="flex items-center space-x-2">
+                        {{ star_helper.render_stars(blog.getAverageRating()|round(0, 'floor')) }}
+                        <span class="text-gray-500">({{ blog.getAverageRating() }}/5)</span>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-600">
+                    {{ blog.description|slice(0, 80) }}{% if blog.description|length > 80 %}...{% endif %}
+                </p>
+                <div class="text-center mt-4">
+                    <a 
+                        href="/blogs/{{ blog.id }}" 
+                        class="text-blue-500 hover:underline">
+                        Read More
+                    </a>
+                </div>
+            </article>
+        {% else %}
+            <div class="text-center col-span-full text-gray-500 italic">
+                No blogs available. Start by adding your first blog review!
+            </div>
+        {% endfor %}
+    </section>
+</div>
+
+<script>
+document.getElementById('searchInput').addEventListener('input', function() {
+    const title = encodeURIComponent(this.value.trim());
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', `{{ path('blog_index') }}?title=${title}`, true);
+    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+
+    xhr.onload = function() {
+        if (xhr.status >= 200 && xhr.status < 300) {
+            const response = JSON.parse(xhr.responseText);
+            const blogsContainer = document.getElementById('blogsContainer');
+            blogsContainer.innerHTML = '';
+
+            if (response.blogs.length > 0) {
+                response.blogs.forEach(function(blog) {
+                    const div = document.createElement('div');
+                    div.innerHTML = `<h3>${blog.title}</h3><p>${blog.description}</p>`;
+                    blogsContainer.appendChild(div);
+                });
+            } else {
+                blogsContainer.innerHTML = '<p>No blogs found.</p>';
+            }
+        }
+    };
+    xhr.send();
+});
+</script>
+{% endblock %}

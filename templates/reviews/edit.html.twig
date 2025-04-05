@@ -1,0 +1,35 @@
+{% extends './base.html.twig' %}
+
+{% block body %}
+<div class="w-4/5 m-auto text-left">
+    <div class="py-15">
+        <h1 class="text-6xl font-bold">
+            Edit Review
+        </h1>
+    </div>
+</div>
+
+<div class="w-4/5 m-auto pt-10">
+    <div class="bg-gray-100 p-10 rounded-lg shadow-lg">
+        {{ form_start(form) }}
+            <div class="mb-6">
+                {{ form_label(form.content, 'Review Content', {'label_attr': {'class': 'block text-lg font-medium text-gray-700'}}) }}
+                {{ form_widget(form.content, {'attr': {'class': 'mt-1 block w-full rounded-md shadow-sm border-gray-300 focus:ring-blue-500 focus:border-blue-500'}}) }}
+                {{ form_errors(form.content) }}
+            </div>
+
+            <div class="mb-6">
+                {{ form_label(form.rating, 'Rating (1-5)', {'label_attr': {'class': 'block text-lg font-medium text-gray-700'}}) }}
+                {{ form_widget(form.rating, {'attr': {'class': 'mt-1 block w-full rounded-md shadow-sm border-gray-300 focus:ring-blue-500 focus:border-blue-500'}}) }}
+                {{ form_errors(form.rating) }}
+            </div>
+
+            <button    
+                type="submit"
+                class="uppercase bg-green-500 text-gray-100 text-lg font-extrabold py-4 px-8 rounded-3xl hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 transition-all">
+                Update Review
+            </button>
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

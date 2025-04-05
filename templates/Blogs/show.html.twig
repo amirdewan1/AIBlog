@@ -1,0 +1,105 @@
+{% extends "./base.html.twig" %}
+
+{% block body %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-28">
+    <div class="py-12">
+        <h1 class="text-center text-5xl font-extrabold text-gray-900 mb-4">{{ blog.title }}</h1>
+        <div class="text-center">
+            <span class="text-lg text-gray-600">Created by Amir</span>
+        </div>
+    </div>
+
+    <div class="flex justify-center my-6">
+       <img src="{{ path('uploaded_file', { filename: blog.imagePath|split('/')|last }) }}" alt="{{ blog.title }}">
+
+
+    </div>
+
+    {% macro render_stars(rating) %}
+    <div class="flex items-center space-x-1">
+        {% for i in 1..5 %}
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="{{ i <= rating ? 'gold' : 'none' }}" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927a1 1 0 011.902 0l2.31 6.957a1 1 0 00.95.69h7.273a1 1 0 01.592 1.806l-5.898 4.301a1 1 0 00-.364 1.118l2.31 6.957a1 1 0 01-1.536 1.118l-5.898-4.301a1 1 0 00-1.175 0l-5.898 4.301a1 1 0 01-1.536-1.118l2.31-6.957a1 1 0 00-.364-1.118L2.196 11.38a1 1 0 01.592-1.806h7.273a1 1 0 00.95-.69l2.31-6.957z" />
+            </svg>
+        {% endfor %}
+    </div>
+    {% endmacro %}
+
+    <div class="mt-8">
+        <p class="text-lg text-gray-700 leading-relaxed">{{ blog.description }}</p>
+    </div>
+
+   <div class="mt-8">
+    <h3 class="text-2xl font-semibold text-gray-800 mb-4">Reviews & Ratings</h3>
+
+    <div class="mb-6">
+        <h4 class="text-lg font-bold text-gray-700">Average Rating</h4>
+        {% import _self as star_helper %}
+        <div class="flex items-center">
+            {{ star_helper.render_stars(blog.getAverageRating()|round(0, 'floor')) }}
+            <span class="ml-2 text-gray-600">({{ blog.getAverageRating() }}/5)</span>
+        </div>
+    </div>
+
+    <ul class="space-y-4">
+        {% for review in blog.reviews %}
+            <li class="bg-gray-100 p-4 rounded-md shadow">
+                <div class="flex items-center justify-between">
+                    {{ star_helper.render_stars(review.rating) }}
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <a href="{{ path('review_edit', { id: review.id }) }}" class="text-blue-500 hover:underline">
+                            Edit
+                        </a>
+                    {% endif %}
+                </div>
+                <p class="text-gray-600 mt-2">{{ review.content }}</p>
+                <p class="text-sm text-gray-400 mt-1">Reviewed on {{ review.createdAt|date('F j, Y') }}</p>
+            </li>
+        {% else %}
+            <p class="text-gray-500">No reviews yet. Be the first to review this blog!</p>
+        {% endfor %}
+    </ul>
+</div>
+
+    <div class="mt-12">
+        <h3 class="text-2xl font-semibold text-gray-800 mb-4">Add a Review</h3>
+        <div class="bg-gray-100 p-6 rounded-lg shadow-md">
+            {{ form_start(form) }}
+                <div class="mb-4">
+                    {{ form_label(form.content, 'Your Review', {'label_attr': {'class': 'block text-sm font-medium text-gray-700'}}) }}
+                    {{ form_widget(form.content, {'attr': {'class': 'mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm'}}) }}
+                    {{ form_errors(form.content) }}
+                </div>
+                <div class="mb-4">
+                    {{ form_label(form.rating, 'Rating (1-5)', {'label_attr': {'class': 'block text-sm font-medium text-gray-700'}}) }}
+                    {{ form_widget(form.rating, {'attr': {'class': 'mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm'}}) }}
+                    {{ form_errors(form.rating) }}
+                </div>
+                <button type="submit" class="bg-green-600 text-white font-semibold px-6 py-3 rounded-md shadow hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-green-400 transition-all">
+                    Submit Review
+                </button>
+            {{ form_end(form) }}
+        </div>
+    </div>
+
+    {% if is_granted('ROLE_ADMIN') %}
+    <div class="text-center my-8 space-x-4">
+        <a href="/blogs/edit/{{ blog.id }}" class="inline-block px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 transition">
+            Edit Blog
+        </a>
+        <a href="/blogs/delete/{{ blog.id }}" class="inline-block px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-md hover:bg-red-600 transition">
+            Delete Blog
+        </a>
+    </div>
+    {% endif %}
+
+    <div class="text-center mt-12">
+        <a href="/blogs" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-800 rounded-md hover:bg-gray-900 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to List
+        </a>
+    </div>
+</div>
+{% endblock %}
